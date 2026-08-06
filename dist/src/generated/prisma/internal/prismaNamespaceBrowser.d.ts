@@ -27,6 +27,7 @@ export declare const UsersScalarFieldEnum: {
     readonly name: "name";
     readonly email: "email";
     readonly password: "password";
+    readonly role: "role";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
     readonly deletedAt: "deletedAt";
@@ -38,8 +39,9 @@ export declare const LeadScalarFieldEnum: {
     readonly name: "name";
     readonly email: "email";
     readonly phone: "phone";
-    readonly Product: "Product";
-    readonly Finality: "Finality";
+    readonly product: "product";
+    readonly finality: "finality";
+    readonly status: "status";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };

@@ -38,6 +38,7 @@ export const UsersScalarFieldEnum = {
     name: 'name',
     email: 'email',
     password: 'password',
+    role: 'role',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
@@ -48,8 +49,9 @@ export const LeadScalarFieldEnum = {
     name: 'name',
     email: 'email',
     phone: 'phone',
-    Product: 'Product',
-    Finality: 'Finality',
+    product: 'product',
+    finality: 'finality',
+    status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

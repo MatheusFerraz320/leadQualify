@@ -8,6 +8,7 @@ export declare class AuthController {
         id: string;
         name: string;
         email: string;
+        role: import("../generated/prisma/enums.js").UserRole;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;

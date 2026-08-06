@@ -8,10 +8,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { Match } from '../../common/decorators/match.decorator.js';
 export class SignupDto {
     name;
     email;
     password;
+    confirm_password;
+    role;
 }
 __decorate([
     IsString(),
@@ -28,4 +31,15 @@ __decorate([
     MinLength(8, { message: 'password deve ter no mínimo 8 caracteres' }),
     __metadata("design:type", String)
 ], SignupDto.prototype, "password", void 0);
+__decorate([
+    IsString(),
+    IsNotEmpty({ message: 'confirm_password é obrigatório' }),
+    Match('password'),
+    __metadata("design:type", String)
+], SignupDto.prototype, "confirm_password", void 0);
+__decorate([
+    IsString(),
+    IsNotEmpty({ message: 'role é obrigatório' }),
+    __metadata("design:type", String)
+], SignupDto.prototype, "role", void 0);
 //# sourceMappingURL=signup.dto.js.map
