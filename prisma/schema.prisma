@@ -12,6 +12,7 @@ model Users {
   name      String
   email     String   @unique
   password  String
+  role      UserRole @default(COLLABORATOR)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -25,10 +26,22 @@ model Lead {
   name      String
   email     String
   phone     String
-  Product   String
-  Finality  String
+  product   String
+  finality  String
+  status    LeadStatus @default(PENDING)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([userId, email])
+}
+
+enum LeadStatus {
+  APPROVED
+  PENDING
+  REJECTED
+}
+
+enum UserRole {
+  ADMIN
+  COLLABORATOR
 }
