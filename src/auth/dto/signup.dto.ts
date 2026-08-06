@@ -1,4 +1,11 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from 'class-validator';
+import { UserRole } from '../../generated/prisma/enums.js';
 import { Match } from '../../common/decorators/match.decorator.js';
 
 export class SignupDto {
@@ -15,11 +22,10 @@ export class SignupDto {
   password: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'confirm_password é obrigatório' })
+  @IsNotEmpty({ message: 'confirme sua senha' })
   @Match('password')
   confirm_password: string;
 
-  @IsString()
-  @IsNotEmpty({ message: 'role é obrigatório' })
+  @IsEnum(UserRole, { message: 'role inválida' })
   role: string;
 }

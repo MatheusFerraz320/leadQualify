@@ -1,3 +1,4 @@
+import { UserRole } from '../generated/prisma/enums.js';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { SignupDto } from './dto/signup.dto.js';
@@ -8,7 +9,7 @@ export declare class AuthController {
         id: string;
         name: string;
         email: string;
-        role: import("../generated/prisma/enums.js").UserRole;
+        role: UserRole;
         createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;

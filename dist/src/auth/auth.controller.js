@@ -10,10 +10,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, } from '@nestjs/common';
+import { UserRole } from '../generated/prisma/enums.js';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { SignupDto } from './dto/signup.dto.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { AuthGuard } from '../common/guards/auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
@@ -28,6 +32,8 @@ let AuthController = class AuthController {
 };
 __decorate([
     Post('signup'),
+    UseGuards(AuthGuard, RolesGuard),
+    Roles(UserRole.ADMIN),
     __param(0, Body()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [SignupDto]),

@@ -7,7 +7,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength, } from 'class-validator';
+import { UserRole } from '../../generated/prisma/enums.js';
 import { Match } from '../../common/decorators/match.decorator.js';
 export class SignupDto {
     name;
@@ -33,13 +34,12 @@ __decorate([
 ], SignupDto.prototype, "password", void 0);
 __decorate([
     IsString(),
-    IsNotEmpty({ message: 'confirm_password é obrigatório' }),
+    IsNotEmpty({ message: 'confirme sua senha' }),
     Match('password'),
     __metadata("design:type", String)
 ], SignupDto.prototype, "confirm_password", void 0);
 __decorate([
-    IsString(),
-    IsNotEmpty({ message: 'role é obrigatório' }),
+    IsEnum(UserRole, { message: 'role inválida' }),
     __metadata("design:type", String)
 ], SignupDto.prototype, "role", void 0);
 //# sourceMappingURL=signup.dto.js.map
