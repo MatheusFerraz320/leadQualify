@@ -8,50 +8,68 @@ export type AggregateLead = {
 };
 export type LeadMinAggregateOutputType = {
     id: string | null;
-    clientId: string | null;
+    userId: string | null;
     name: string | null;
     email: string | null;
+    phone: string | null;
+    Product: string | null;
+    Finality: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
 export type LeadMaxAggregateOutputType = {
     id: string | null;
-    clientId: string | null;
+    userId: string | null;
     name: string | null;
     email: string | null;
+    phone: string | null;
+    Product: string | null;
+    Finality: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
 export type LeadCountAggregateOutputType = {
     id: number;
-    clientId: number;
+    userId: number;
     name: number;
     email: number;
+    phone: number;
+    Product: number;
+    Finality: number;
     createdAt: number;
     updatedAt: number;
     _all: number;
 };
 export type LeadMinAggregateInputType = {
     id?: true;
-    clientId?: true;
+    userId?: true;
     name?: true;
     email?: true;
+    phone?: true;
+    Product?: true;
+    Finality?: true;
     createdAt?: true;
     updatedAt?: true;
 };
 export type LeadMaxAggregateInputType = {
     id?: true;
-    clientId?: true;
+    userId?: true;
     name?: true;
     email?: true;
+    phone?: true;
+    Product?: true;
+    Finality?: true;
     createdAt?: true;
     updatedAt?: true;
 };
 export type LeadCountAggregateInputType = {
     id?: true;
-    clientId?: true;
+    userId?: true;
     name?: true;
     email?: true;
+    phone?: true;
+    Product?: true;
+    Finality?: true;
     createdAt?: true;
     updatedAt?: true;
     _all?: true;
@@ -82,9 +100,12 @@ export type LeadGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 };
 export type LeadGroupByOutputType = {
     id: string;
-    clientId: string;
+    userId: string;
     name: string;
     email: string;
+    phone: string;
+    Product: string;
+    Finality: string;
     createdAt: Date;
     updatedAt: Date;
     _count: LeadCountAggregateOutputType | null;
@@ -99,40 +120,52 @@ export type LeadWhereInput = {
     OR?: Prisma.LeadWhereInput[];
     NOT?: Prisma.LeadWhereInput | Prisma.LeadWhereInput[];
     id?: Prisma.StringFilter<"Lead"> | string;
-    clientId?: Prisma.StringFilter<"Lead"> | string;
+    userId?: Prisma.StringFilter<"Lead"> | string;
     name?: Prisma.StringFilter<"Lead"> | string;
     email?: Prisma.StringFilter<"Lead"> | string;
+    phone?: Prisma.StringFilter<"Lead"> | string;
+    Product?: Prisma.StringFilter<"Lead"> | string;
+    Finality?: Prisma.StringFilter<"Lead"> | string;
     createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Lead"> | Date | string;
-    client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>;
+    user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.UsersWhereInput>;
 };
 export type LeadOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
-    clientId?: Prisma.SortOrder;
+    userId?: Prisma.SortOrder;
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
+    phone?: Prisma.SortOrder;
+    Product?: Prisma.SortOrder;
+    Finality?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
-    client?: Prisma.ClientOrderByWithRelationInput;
+    user?: Prisma.UsersOrderByWithRelationInput;
 };
 export type LeadWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
-    clientId_email?: Prisma.LeadClientIdEmailCompoundUniqueInput;
+    userId_email?: Prisma.LeadUserIdEmailCompoundUniqueInput;
     AND?: Prisma.LeadWhereInput | Prisma.LeadWhereInput[];
     OR?: Prisma.LeadWhereInput[];
     NOT?: Prisma.LeadWhereInput | Prisma.LeadWhereInput[];
-    clientId?: Prisma.StringFilter<"Lead"> | string;
+    userId?: Prisma.StringFilter<"Lead"> | string;
     name?: Prisma.StringFilter<"Lead"> | string;
     email?: Prisma.StringFilter<"Lead"> | string;
+    phone?: Prisma.StringFilter<"Lead"> | string;
+    Product?: Prisma.StringFilter<"Lead"> | string;
+    Finality?: Prisma.StringFilter<"Lead"> | string;
     createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Lead"> | Date | string;
-    client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>;
-}, "id" | "clientId_email">;
+    user?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.UsersWhereInput>;
+}, "id" | "userId_email">;
 export type LeadOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
-    clientId?: Prisma.SortOrder;
+    userId?: Prisma.SortOrder;
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
+    phone?: Prisma.SortOrder;
+    Product?: Prisma.SortOrder;
+    Finality?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     _count?: Prisma.LeadCountOrderByAggregateInput;
@@ -144,9 +177,12 @@ export type LeadScalarWhereWithAggregatesInput = {
     OR?: Prisma.LeadScalarWhereWithAggregatesInput[];
     NOT?: Prisma.LeadScalarWhereWithAggregatesInput | Prisma.LeadScalarWhereWithAggregatesInput[];
     id?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
-    clientId?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
+    userId?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
     name?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
     email?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
+    phone?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
+    Product?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
+    Finality?: Prisma.StringWithAggregatesFilter<"Lead"> | string;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"Lead"> | Date | string;
     updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Lead"> | Date | string;
 };
@@ -154,15 +190,21 @@ export type LeadCreateInput = {
     id?: string;
     name: string;
     email: string;
+    phone: string;
+    Product: string;
+    Finality: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
-    client: Prisma.ClientCreateNestedOneWithoutLeadsInput;
+    user: Prisma.UsersCreateNestedOneWithoutLeadsInput;
 };
 export type LeadUncheckedCreateInput = {
     id?: string;
-    clientId: string;
+    userId: string;
     name: string;
     email: string;
+    phone: string;
+    Product: string;
+    Finality: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
@@ -170,23 +212,32 @@ export type LeadUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
+    phone?: Prisma.StringFieldUpdateOperationsInput | string;
+    Product?: Prisma.StringFieldUpdateOperationsInput | string;
+    Finality?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    client?: Prisma.ClientUpdateOneRequiredWithoutLeadsNestedInput;
+    user?: Prisma.UsersUpdateOneRequiredWithoutLeadsNestedInput;
 };
 export type LeadUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    clientId?: Prisma.StringFieldUpdateOperationsInput | string;
+    userId?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
+    phone?: Prisma.StringFieldUpdateOperationsInput | string;
+    Product?: Prisma.StringFieldUpdateOperationsInput | string;
+    Finality?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type LeadCreateManyInput = {
     id?: string;
-    clientId: string;
+    userId: string;
     name: string;
     email: string;
+    phone: string;
+    Product: string;
+    Finality: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
@@ -194,14 +245,20 @@ export type LeadUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
+    phone?: Prisma.StringFieldUpdateOperationsInput | string;
+    Product?: Prisma.StringFieldUpdateOperationsInput | string;
+    Finality?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type LeadUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    clientId?: Prisma.StringFieldUpdateOperationsInput | string;
+    userId?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
+    phone?: Prisma.StringFieldUpdateOperationsInput | string;
+    Product?: Prisma.StringFieldUpdateOperationsInput | string;
+    Finality?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -213,201 +270,246 @@ export type LeadListRelationFilter = {
 export type LeadOrderByRelationAggregateInput = {
     _count?: Prisma.SortOrder;
 };
-export type LeadClientIdEmailCompoundUniqueInput = {
-    clientId: string;
+export type LeadUserIdEmailCompoundUniqueInput = {
+    userId: string;
     email: string;
 };
 export type LeadCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
-    clientId?: Prisma.SortOrder;
+    userId?: Prisma.SortOrder;
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
+    phone?: Prisma.SortOrder;
+    Product?: Prisma.SortOrder;
+    Finality?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
 export type LeadMaxOrderByAggregateInput = {
     id?: Prisma.SortOrder;
-    clientId?: Prisma.SortOrder;
+    userId?: Prisma.SortOrder;
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
+    phone?: Prisma.SortOrder;
+    Product?: Prisma.SortOrder;
+    Finality?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
 export type LeadMinOrderByAggregateInput = {
     id?: Prisma.SortOrder;
-    clientId?: Prisma.SortOrder;
+    userId?: Prisma.SortOrder;
     name?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
+    phone?: Prisma.SortOrder;
+    Product?: Prisma.SortOrder;
+    Finality?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
-export type LeadCreateNestedManyWithoutClientInput = {
-    create?: Prisma.XOR<Prisma.LeadCreateWithoutClientInput, Prisma.LeadUncheckedCreateWithoutClientInput> | Prisma.LeadCreateWithoutClientInput[] | Prisma.LeadUncheckedCreateWithoutClientInput[];
-    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutClientInput | Prisma.LeadCreateOrConnectWithoutClientInput[];
-    createMany?: Prisma.LeadCreateManyClientInputEnvelope;
+export type LeadCreateNestedManyWithoutUserInput = {
+    create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput> | Prisma.LeadCreateWithoutUserInput[] | Prisma.LeadUncheckedCreateWithoutUserInput[];
+    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput | Prisma.LeadCreateOrConnectWithoutUserInput[];
+    createMany?: Prisma.LeadCreateManyUserInputEnvelope;
     connect?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
 };
-export type LeadUncheckedCreateNestedManyWithoutClientInput = {
-    create?: Prisma.XOR<Prisma.LeadCreateWithoutClientInput, Prisma.LeadUncheckedCreateWithoutClientInput> | Prisma.LeadCreateWithoutClientInput[] | Prisma.LeadUncheckedCreateWithoutClientInput[];
-    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutClientInput | Prisma.LeadCreateOrConnectWithoutClientInput[];
-    createMany?: Prisma.LeadCreateManyClientInputEnvelope;
+export type LeadUncheckedCreateNestedManyWithoutUserInput = {
+    create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput> | Prisma.LeadCreateWithoutUserInput[] | Prisma.LeadUncheckedCreateWithoutUserInput[];
+    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput | Prisma.LeadCreateOrConnectWithoutUserInput[];
+    createMany?: Prisma.LeadCreateManyUserInputEnvelope;
     connect?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
 };
-export type LeadUpdateManyWithoutClientNestedInput = {
-    create?: Prisma.XOR<Prisma.LeadCreateWithoutClientInput, Prisma.LeadUncheckedCreateWithoutClientInput> | Prisma.LeadCreateWithoutClientInput[] | Prisma.LeadUncheckedCreateWithoutClientInput[];
-    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutClientInput | Prisma.LeadCreateOrConnectWithoutClientInput[];
-    upsert?: Prisma.LeadUpsertWithWhereUniqueWithoutClientInput | Prisma.LeadUpsertWithWhereUniqueWithoutClientInput[];
-    createMany?: Prisma.LeadCreateManyClientInputEnvelope;
+export type LeadUpdateManyWithoutUserNestedInput = {
+    create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput> | Prisma.LeadCreateWithoutUserInput[] | Prisma.LeadUncheckedCreateWithoutUserInput[];
+    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput | Prisma.LeadCreateOrConnectWithoutUserInput[];
+    upsert?: Prisma.LeadUpsertWithWhereUniqueWithoutUserInput | Prisma.LeadUpsertWithWhereUniqueWithoutUserInput[];
+    createMany?: Prisma.LeadCreateManyUserInputEnvelope;
     set?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
     disconnect?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
     delete?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
     connect?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
-    update?: Prisma.LeadUpdateWithWhereUniqueWithoutClientInput | Prisma.LeadUpdateWithWhereUniqueWithoutClientInput[];
-    updateMany?: Prisma.LeadUpdateManyWithWhereWithoutClientInput | Prisma.LeadUpdateManyWithWhereWithoutClientInput[];
+    update?: Prisma.LeadUpdateWithWhereUniqueWithoutUserInput | Prisma.LeadUpdateWithWhereUniqueWithoutUserInput[];
+    updateMany?: Prisma.LeadUpdateManyWithWhereWithoutUserInput | Prisma.LeadUpdateManyWithWhereWithoutUserInput[];
     deleteMany?: Prisma.LeadScalarWhereInput | Prisma.LeadScalarWhereInput[];
 };
-export type LeadUncheckedUpdateManyWithoutClientNestedInput = {
-    create?: Prisma.XOR<Prisma.LeadCreateWithoutClientInput, Prisma.LeadUncheckedCreateWithoutClientInput> | Prisma.LeadCreateWithoutClientInput[] | Prisma.LeadUncheckedCreateWithoutClientInput[];
-    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutClientInput | Prisma.LeadCreateOrConnectWithoutClientInput[];
-    upsert?: Prisma.LeadUpsertWithWhereUniqueWithoutClientInput | Prisma.LeadUpsertWithWhereUniqueWithoutClientInput[];
-    createMany?: Prisma.LeadCreateManyClientInputEnvelope;
+export type LeadUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput> | Prisma.LeadCreateWithoutUserInput[] | Prisma.LeadUncheckedCreateWithoutUserInput[];
+    connectOrCreate?: Prisma.LeadCreateOrConnectWithoutUserInput | Prisma.LeadCreateOrConnectWithoutUserInput[];
+    upsert?: Prisma.LeadUpsertWithWhereUniqueWithoutUserInput | Prisma.LeadUpsertWithWhereUniqueWithoutUserInput[];
+    createMany?: Prisma.LeadCreateManyUserInputEnvelope;
     set?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
     disconnect?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
     delete?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
     connect?: Prisma.LeadWhereUniqueInput | Prisma.LeadWhereUniqueInput[];
-    update?: Prisma.LeadUpdateWithWhereUniqueWithoutClientInput | Prisma.LeadUpdateWithWhereUniqueWithoutClientInput[];
-    updateMany?: Prisma.LeadUpdateManyWithWhereWithoutClientInput | Prisma.LeadUpdateManyWithWhereWithoutClientInput[];
+    update?: Prisma.LeadUpdateWithWhereUniqueWithoutUserInput | Prisma.LeadUpdateWithWhereUniqueWithoutUserInput[];
+    updateMany?: Prisma.LeadUpdateManyWithWhereWithoutUserInput | Prisma.LeadUpdateManyWithWhereWithoutUserInput[];
     deleteMany?: Prisma.LeadScalarWhereInput | Prisma.LeadScalarWhereInput[];
 };
-export type LeadCreateWithoutClientInput = {
+export type LeadCreateWithoutUserInput = {
     id?: string;
     name: string;
     email: string;
+    phone: string;
+    Product: string;
+    Finality: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
-export type LeadUncheckedCreateWithoutClientInput = {
+export type LeadUncheckedCreateWithoutUserInput = {
     id?: string;
     name: string;
     email: string;
+    phone: string;
+    Product: string;
+    Finality: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
-export type LeadCreateOrConnectWithoutClientInput = {
+export type LeadCreateOrConnectWithoutUserInput = {
     where: Prisma.LeadWhereUniqueInput;
-    create: Prisma.XOR<Prisma.LeadCreateWithoutClientInput, Prisma.LeadUncheckedCreateWithoutClientInput>;
+    create: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>;
 };
-export type LeadCreateManyClientInputEnvelope = {
-    data: Prisma.LeadCreateManyClientInput | Prisma.LeadCreateManyClientInput[];
+export type LeadCreateManyUserInputEnvelope = {
+    data: Prisma.LeadCreateManyUserInput | Prisma.LeadCreateManyUserInput[];
     skipDuplicates?: boolean;
 };
-export type LeadUpsertWithWhereUniqueWithoutClientInput = {
+export type LeadUpsertWithWhereUniqueWithoutUserInput = {
     where: Prisma.LeadWhereUniqueInput;
-    update: Prisma.XOR<Prisma.LeadUpdateWithoutClientInput, Prisma.LeadUncheckedUpdateWithoutClientInput>;
-    create: Prisma.XOR<Prisma.LeadCreateWithoutClientInput, Prisma.LeadUncheckedCreateWithoutClientInput>;
+    update: Prisma.XOR<Prisma.LeadUpdateWithoutUserInput, Prisma.LeadUncheckedUpdateWithoutUserInput>;
+    create: Prisma.XOR<Prisma.LeadCreateWithoutUserInput, Prisma.LeadUncheckedCreateWithoutUserInput>;
 };
-export type LeadUpdateWithWhereUniqueWithoutClientInput = {
+export type LeadUpdateWithWhereUniqueWithoutUserInput = {
     where: Prisma.LeadWhereUniqueInput;
-    data: Prisma.XOR<Prisma.LeadUpdateWithoutClientInput, Prisma.LeadUncheckedUpdateWithoutClientInput>;
+    data: Prisma.XOR<Prisma.LeadUpdateWithoutUserInput, Prisma.LeadUncheckedUpdateWithoutUserInput>;
 };
-export type LeadUpdateManyWithWhereWithoutClientInput = {
+export type LeadUpdateManyWithWhereWithoutUserInput = {
     where: Prisma.LeadScalarWhereInput;
-    data: Prisma.XOR<Prisma.LeadUpdateManyMutationInput, Prisma.LeadUncheckedUpdateManyWithoutClientInput>;
+    data: Prisma.XOR<Prisma.LeadUpdateManyMutationInput, Prisma.LeadUncheckedUpdateManyWithoutUserInput>;
 };
 export type LeadScalarWhereInput = {
     AND?: Prisma.LeadScalarWhereInput | Prisma.LeadScalarWhereInput[];
     OR?: Prisma.LeadScalarWhereInput[];
     NOT?: Prisma.LeadScalarWhereInput | Prisma.LeadScalarWhereInput[];
     id?: Prisma.StringFilter<"Lead"> | string;
-    clientId?: Prisma.StringFilter<"Lead"> | string;
+    userId?: Prisma.StringFilter<"Lead"> | string;
     name?: Prisma.StringFilter<"Lead"> | string;
     email?: Prisma.StringFilter<"Lead"> | string;
+    phone?: Prisma.StringFilter<"Lead"> | string;
+    Product?: Prisma.StringFilter<"Lead"> | string;
+    Finality?: Prisma.StringFilter<"Lead"> | string;
     createdAt?: Prisma.DateTimeFilter<"Lead"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Lead"> | Date | string;
 };
-export type LeadCreateManyClientInput = {
+export type LeadCreateManyUserInput = {
     id?: string;
     name: string;
     email: string;
+    phone: string;
+    Product: string;
+    Finality: string;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
-export type LeadUpdateWithoutClientInput = {
+export type LeadUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
+    phone?: Prisma.StringFieldUpdateOperationsInput | string;
+    Product?: Prisma.StringFieldUpdateOperationsInput | string;
+    Finality?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
-export type LeadUncheckedUpdateWithoutClientInput = {
+export type LeadUncheckedUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
+    phone?: Prisma.StringFieldUpdateOperationsInput | string;
+    Product?: Prisma.StringFieldUpdateOperationsInput | string;
+    Finality?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
-export type LeadUncheckedUpdateManyWithoutClientInput = {
+export type LeadUncheckedUpdateManyWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     name?: Prisma.StringFieldUpdateOperationsInput | string;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
+    phone?: Prisma.StringFieldUpdateOperationsInput | string;
+    Product?: Prisma.StringFieldUpdateOperationsInput | string;
+    Finality?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type LeadSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
-    clientId?: boolean;
+    userId?: boolean;
     name?: boolean;
     email?: boolean;
+    phone?: boolean;
+    Product?: boolean;
+    Finality?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
-    client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["lead"]>;
 export type LeadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
-    clientId?: boolean;
+    userId?: boolean;
     name?: boolean;
     email?: boolean;
+    phone?: boolean;
+    Product?: boolean;
+    Finality?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
-    client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["lead"]>;
 export type LeadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
-    clientId?: boolean;
+    userId?: boolean;
     name?: boolean;
     email?: boolean;
+    phone?: boolean;
+    Product?: boolean;
+    Finality?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
-    client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["lead"]>;
 export type LeadSelectScalar = {
     id?: boolean;
-    clientId?: boolean;
+    userId?: boolean;
     name?: boolean;
     email?: boolean;
+    phone?: boolean;
+    Product?: boolean;
+    Finality?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "name" | "email" | "createdAt" | "updatedAt", ExtArgs["result"]["lead"]>;
+export type LeadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "email" | "phone" | "Product" | "Finality" | "createdAt" | "updatedAt", ExtArgs["result"]["lead"]>;
 export type LeadInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>;
 };
 export type LeadIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>;
 };
 export type LeadIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>;
+    user?: boolean | Prisma.UsersDefaultArgs<ExtArgs>;
 };
 export type $LeadPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     name: "Lead";
     objects: {
-        client: Prisma.$ClientPayload<ExtArgs>;
+        user: Prisma.$UsersPayload<ExtArgs>;
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
-        clientId: string;
+        userId: string;
         name: string;
         email: string;
+        phone: string;
+        Product: string;
+        Finality: string;
         createdAt: Date;
         updatedAt: Date;
     }, ExtArgs["result"]["lead"]>;
@@ -462,16 +564,19 @@ export interface LeadDelegate<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 export interface Prisma__LeadClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise";
-    client<T extends Prisma.ClientDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientDefaultArgs<ExtArgs>>): Prisma.Prisma__ClientClient<runtime.Types.Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
+    user<T extends Prisma.UsersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UsersDefaultArgs<ExtArgs>>): Prisma.Prisma__UsersClient<runtime.Types.Result.GetResult<Prisma.$UsersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): runtime.Types.Utils.JsPromise<TResult1 | TResult2>;
     catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): runtime.Types.Utils.JsPromise<T | TResult>;
     finally(onfinally?: (() => void) | undefined | null): runtime.Types.Utils.JsPromise<T>;
 }
 export interface LeadFieldRefs {
     readonly id: Prisma.FieldRef<"Lead", 'String'>;
-    readonly clientId: Prisma.FieldRef<"Lead", 'String'>;
+    readonly userId: Prisma.FieldRef<"Lead", 'String'>;
     readonly name: Prisma.FieldRef<"Lead", 'String'>;
     readonly email: Prisma.FieldRef<"Lead", 'String'>;
+    readonly phone: Prisma.FieldRef<"Lead", 'String'>;
+    readonly Product: Prisma.FieldRef<"Lead", 'String'>;
+    readonly Finality: Prisma.FieldRef<"Lead", 'String'>;
     readonly createdAt: Prisma.FieldRef<"Lead", 'DateTime'>;
     readonly updatedAt: Prisma.FieldRef<"Lead", 'DateTime'>;
 }

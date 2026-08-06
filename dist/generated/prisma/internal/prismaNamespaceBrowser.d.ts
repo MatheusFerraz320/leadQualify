@@ -11,7 +11,7 @@ export declare const DbNull: import("@prisma/client-runtime-utils").DbNullClass;
 export declare const JsonNull: import("@prisma/client-runtime-utils").JsonNullClass;
 export declare const AnyNull: import("@prisma/client-runtime-utils").AnyNullClass;
 export declare const ModelName: {
-    readonly Client: "Client";
+    readonly Users: "Users";
     readonly Lead: "Lead";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -22,19 +22,24 @@ export declare const TransactionIsolationLevel: {
     readonly Serializable: "Serializable";
 };
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel];
-export declare const ClientScalarFieldEnum: {
+export declare const UsersScalarFieldEnum: {
     readonly id: "id";
     readonly name: "name";
     readonly email: "email";
+    readonly password: "password";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
+    readonly deletedAt: "deletedAt";
 };
-export type ClientScalarFieldEnum = (typeof ClientScalarFieldEnum)[keyof typeof ClientScalarFieldEnum];
+export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum];
 export declare const LeadScalarFieldEnum: {
     readonly id: "id";
-    readonly clientId: "clientId";
+    readonly userId: "userId";
     readonly name: "name";
     readonly email: "email";
+    readonly phone: "phone";
+    readonly Product: "Product";
+    readonly Finality: "Finality";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };
@@ -49,3 +54,8 @@ export declare const QueryMode: {
     readonly insensitive: "insensitive";
 };
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode];
+export declare const NullsOrder: {
+    readonly first: "first";
+    readonly last: "last";
+};
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
