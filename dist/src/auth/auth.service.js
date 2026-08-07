@@ -11,6 +11,7 @@ import { ConflictException, Injectable, UnauthorizedException, } from '@nestjs/c
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { prismaErrorCode } from '../common/utils/prisma-error.util.js';
 const SALT_ROUNDS = 10;
 let AuthService = class AuthService {
     prisma;
@@ -20,22 +21,24 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
     }
     async signup(dto) {
-        const existing = await this.prisma.users.findUnique({
-            where: { email: dto.email },
-        });
-        if (existing) {
-            throw new ConflictException('Email já cadastrado');
-        }
         const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-        const user = await this.prisma.users.create({
-            data: {
-                name: dto.name,
-                email: dto.email,
-                password: passwordHash,
-            },
-            omit: { password: true },
-        });
-        return user;
+        try {
+            return await this.prisma.users.create({
+                data: {
+                    name: dto.name,
+                    email: dto.email,
+                    password: passwordHash,
+                    role: dto.role,
+                },
+                omit: { password: true },
+            });
+        }
+        catch (error) {
+            if (prismaErrorCode(error) === 'P2002') {
+                throw new ConflictException('Email já cadastrado');
+            }
+            throw error;
+        }
     }
     async login(dto) {
         const user = await this.prisma.users.findUnique({

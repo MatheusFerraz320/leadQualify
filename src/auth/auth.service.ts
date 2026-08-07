@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { prismaErrorCode } from '../common/utils/prisma-error.util.js';
 import { LoginDto } from './dto/login.dto.js';
 import { SignupDto } from './dto/signup.dto.js';
 
@@ -19,25 +20,24 @@ export class AuthService {
   ) {}
 
   async signup(dto: SignupDto) {
-    const existing = await this.prisma.users.findUnique({
-      where: { email: dto.email },
-    });
-    if (existing) {
-      throw new ConflictException('Email já cadastrado');
-    }
-
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
 
-    const user = await this.prisma.users.create({
-      data: {
-        name: dto.name,
-        email: dto.email,
-        password: passwordHash,
-      },
-      omit: { password: true },
-    });
-
-    return user;
+    try {
+      return await this.prisma.users.create({
+        data: {
+          name: dto.name,
+          email: dto.email,
+          password: passwordHash,
+          role: dto.role,
+        },
+        omit: { password: true },
+      });
+    } catch (error) {
+      if (prismaErrorCode(error) === 'P2002') {
+        throw new ConflictException('Email já cadastrado');
+      }
+      throw error;
+    }
   }
 
   async login(dto: LoginDto) {

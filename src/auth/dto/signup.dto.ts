@@ -27,5 +27,5 @@ export class SignupDto {
   confirm_password: string;
 
   @IsEnum(UserRole, { message: 'role inválida' })
-  role: string;
+  role: UserRole;
 }
