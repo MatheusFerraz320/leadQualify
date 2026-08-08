@@ -1,4 +1,4 @@
-interface RdWebhookConversion {
+export interface RdWebhookConversion {
   content?: Record<string, unknown>;
   [key: string]: unknown;
 }
@@ -14,6 +14,7 @@ export interface RdWebhookLead {
   job_title?: string;
   first_conversion?: RdWebhookConversion;
   last_conversion?: RdWebhookConversion;
+  custom_fields?: Record<string, unknown>;
   [key: string]: unknown;
 }
 

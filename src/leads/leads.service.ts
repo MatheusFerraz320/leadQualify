@@ -11,7 +11,10 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import type { AuthenticatedUser } from '../common/guards/auth.guard.js';
 import { UpdateLeadDto } from './dto/update-lead.dto.js';
 import { QueryLeadsDto } from './dto/query-leads.dto.js';
-import type { RdWebhookPayload } from './rd-webhook.type.js';
+import type {
+  RdWebhookConversion,
+  RdWebhookPayload,
+} from './rd-webhook.type.js';
 
 const LEAD_USER_SELECT = { select: { id: true, name: true, email: true } };
 
@@ -44,7 +47,7 @@ export class LeadsService {
     const entries = this.toWebhookEntries(payload);
 
     const productField =
-      this.config.get<string>('RD_FIELD_PRODUCT') ?? 'cf_produto';
+      this.config.get<string>('RD_FIELD_PRODUCT') ?? 'cf_produto_ou_servico';
     const finalityField =
       this.config.get<string>('RD_FIELD_FINALITY') ?? 'cf_finalidade';
 
@@ -112,8 +115,13 @@ export class LeadsService {
           this.normalize(lead.personal_phone) ??
           this.normalize(lead.mobile_phone) ??
           '',
-        content:
-          lead.first_conversion?.content ?? lead.last_conversion?.content ?? {},
+        content: this.mergeRecords(
+          lead.first_conversion?.content,
+          this.nestedPayload(lead.first_conversion),
+          lead.last_conversion?.content,
+          this.nestedPayload(lead.last_conversion),
+          lead.custom_fields,
+        ),
       }));
     }
 
@@ -129,6 +137,36 @@ export class LeadsService {
         content: contact,
       },
     ];
+  }
+
+  private mergeRecords(
+    ...sources: Array<Record<string, unknown> | undefined>
+  ): Record<string, unknown> {
+    const merged: Record<string, unknown> = {};
+    for (const source of sources) {
+      if (!source) continue;
+      for (const [key, value] of Object.entries(source)) {
+        if (value !== undefined && value !== null) {
+          merged[key] = value;
+        }
+      }
+    }
+    return merged;
+  }
+
+  private nestedPayload(
+    conversion: RdWebhookConversion | undefined,
+  ): Record<string, unknown> {
+    const content = conversion?.content;
+    if (!content || typeof content !== 'object') return {};
+    const original = content['__cdp__original_event'];
+    if (original && typeof original === 'object' && !Array.isArray(original)) {
+      const payload = (original as Record<string, unknown>)['payload'];
+      if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+        return payload as Record<string, unknown>;
+      }
+    }
+    return {};
   }
 
   findAll(user: AuthenticatedUser, query: QueryLeadsDto) {

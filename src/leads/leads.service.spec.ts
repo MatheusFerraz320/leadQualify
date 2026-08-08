@@ -71,25 +71,40 @@ describe('LeadsService', () => {
       const now = new Date();
       prisma.lead.upsert.mockResolvedValue(mockLead(now));
       config.get.mockImplementation((key: string) =>
-        key === 'RD_FIELD_PRODUCT' ? 'cf_produto' : 'cf_finalidade',
+        key === 'RD_FIELD_PRODUCT' ? 'cf_produto_ou_servico' : 'cf_finalidade',
       );
 
       const result = await service.ingestFromWebhook('token-x', {
         leads: [
           {
-            id: '4801358631',
-            email: 'A@B.COM',
-            name: 'João',
-            phone: '48 9999-9999',
+            id: '4979940357',
+            email: 'emailcampo@teste.com',
+            name: 'testeBotao',
+            personal_phone: '1232148912421',
             first_conversion: {
               content: {
                 event_type: 'CONVERSION',
-                event_identifier: '[B2] Filtros e elementos',
-                cf_produto: ['Plano Pro'],
-                cf_finalidade: 'Compra',
-                cf_utm_campanha: ['campanha-1'],
-                cf_utm_palavra_chave: 'kw',
+                event_identifier: 'botao-whatsapp-ecofiltros',
+                'Produto de interesse': 'Plano Pro',
+                Finalidade: 'Compra',
+                __cdp__original_event: {
+                  payload: {
+                    name: 'testeBotao',
+                    cf_produto_ou_servico: 'Plano Pro',
+                    email: 'emailcampo@teste.com',
+                    personal_phone: '1232148912421',
+                    cf_finalidade: 'Compra',
+                    cf_utm_palavra_chave: 'kw',
+                    cf_utm_grupo_anuncio: '',
+                    cf_utm_anuncio_id: '',
+                    cf_utm_campanha: 'campanha-1',
+                  },
+                },
               },
+            },
+            custom_fields: {
+              'Produto de interesse': 'Plano Pro',
+              Finalidade: 'Compra',
             },
           },
         ],
@@ -99,12 +114,17 @@ describe('LeadsService', () => {
         where: { rdWebhookToken: 'token-x' },
       });
       expect(prisma.lead.upsert).toHaveBeenCalledWith({
-        where: { userId_email: { userId: 'user-collab', email: 'a@b.com' } },
+        where: {
+          userId_email: {
+            userId: 'user-collab',
+            email: 'emailcampo@teste.com',
+          },
+        },
         create: {
           userId: 'user-collab',
-          email: 'a@b.com',
-          name: 'João',
-          phone: '48 9999-9999',
+          email: 'emailcampo@teste.com',
+          name: 'testeBotao',
+          phone: '1232148912421',
           product: 'Plano Pro',
           finality: 'Compra',
           utmAnuncioId: null,
@@ -113,8 +133,8 @@ describe('LeadsService', () => {
           utmPalavraChave: 'kw',
         },
         update: {
-          name: 'João',
-          phone: '48 9999-9999',
+          name: 'testeBotao',
+          phone: '1232148912421',
           product: 'Plano Pro',
           finality: 'Compra',
           utmAnuncioId: null,
@@ -129,6 +149,51 @@ describe('LeadsService', () => {
         created: 1,
         updated: 0,
         skipped: 0,
+      });
+    });
+
+    it('captura produto/finalidade vindos apenas da última conversão', async () => {
+      prisma.users.findUnique.mockResolvedValue(user);
+      const now = new Date();
+      prisma.lead.upsert.mockResolvedValue(mockLead(now));
+
+      await service.ingestFromWebhook('token-x', {
+        leads: [
+          {
+            email: 'a@b.com',
+            name: 'Lead',
+            first_conversion: {
+              content: {
+                event_type: 'CONVERSION',
+                event_identifier: 'botao-whatsapp-ecofiltros',
+              },
+            },
+            last_conversion: {
+              content: {
+                event_type: 'CONVERSION',
+                event_identifier: 'formulario',
+                __cdp__original_event: {
+                  payload: {
+                    cf_produto_ou_servico: 'Filtro B2',
+                    cf_finalidade: 'Industrial',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      expect(prisma.lead.upsert).toHaveBeenCalledWith({
+        where: { userId_email: { userId: 'user-collab', email: 'a@b.com' } },
+        create: expect.objectContaining({
+          product: 'Filtro B2',
+          finality: 'Industrial',
+        }),
+        update: expect.objectContaining({
+          product: 'Filtro B2',
+          finality: 'Industrial',
+        }),
       });
     });
 
