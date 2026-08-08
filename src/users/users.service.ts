@@ -8,6 +8,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { prismaErrorCode } from '../common/utils/prisma-error.util.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { UpdateProfileDto } from './dto/update-profile.dto.js';
+import { generateWebhookToken } from '../common/utils/webhook-token.util.js';
 
 const SALT_ROUNDS = 10;
 
@@ -16,7 +17,40 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.users.findMany({ omit: { password: true } });
+    return this.prisma.users.findMany({
+      omit: { password: true, rdWebhookToken: true },
+    });
+  }
+
+  async getWebhookToken(id: string) {
+    try {
+      const user = await this.prisma.users.findUniqueOrThrow({
+        where: { id },
+        omit: { password: true },
+      });
+      return { rdWebhookToken: user.rdWebhookToken };
+    } catch (error) {
+      if (prismaErrorCode(error) === 'P2025') {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+      throw error;
+    }
+  }
+
+  async rotateWebhookToken(id: string) {
+    try {
+      const user = await this.prisma.users.update({
+        where: { id },
+        data: { rdWebhookToken: generateWebhookToken() },
+        omit: { password: true },
+      });
+      return { rdWebhookToken: user.rdWebhookToken };
+    } catch (error) {
+      if (prismaErrorCode(error) === 'P2025') {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+      throw error;
+    }
   }
 
   async update(id: string, dto: UpdateUserDto) {
@@ -29,7 +63,7 @@ export class UsersService {
       return await this.prisma.users.update({
         where: { id },
         data,
-        omit: { password: true },
+        omit: { password: true, rdWebhookToken: true },
       });
     } catch (error) {
       if (prismaErrorCode(error) === 'P2002') {
@@ -52,7 +86,7 @@ export class UsersService {
       return await this.prisma.users.update({
         where: { id },
         data,
-        omit: { password: true },
+        omit: { password: true, rdWebhookToken: true },
       });
     } catch (error) {
       if (prismaErrorCode(error) === 'P2002') {

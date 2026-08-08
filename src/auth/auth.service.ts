@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { prismaErrorCode } from '../common/utils/prisma-error.util.js';
 import { LoginDto } from './dto/login.dto.js';
 import { SignupDto } from './dto/signup.dto.js';
+import { generateWebhookToken } from '../common/utils/webhook-token.util.js';
 
 const SALT_ROUNDS = 10;
 
@@ -29,8 +30,9 @@ export class AuthService {
           email: dto.email,
           password: passwordHash,
           role: dto.role,
+          rdWebhookToken: generateWebhookToken(),
         },
-        omit: { password: true },
+        omit: { password: true, rdWebhookToken: true },
       });
     } catch (error) {
       if (prismaErrorCode(error) === 'P2002') {

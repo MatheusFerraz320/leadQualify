@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Patch,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -28,6 +29,18 @@ export class UsersController {
   @Roles(UserRole.ADMIN)
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @Get(':id/rdstation-token')
+  @Roles(UserRole.ADMIN)
+  getWebhookToken(@Param('id') id: string) {
+    return this.usersService.getWebhookToken(id);
+  }
+
+  @Post(':id/rdstation-token')
+  @Roles(UserRole.ADMIN)
+  rotateWebhookToken(@Param('id') id: string) {
+    return this.usersService.rotateWebhookToken(id);
   }
 
   @Patch('me')
