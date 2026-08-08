@@ -34,7 +34,7 @@ export class LeadsService {
     const email = this.normalizeEmail(contact.email);
 
     if (!email) {
-      throw new BadRequestException('Lead sem email');
+      return { accepted: false, reason: 'missing_email' };
     }
 
     const productField =

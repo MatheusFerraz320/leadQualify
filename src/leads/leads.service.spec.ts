@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LeadStatus, UserRole } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -125,14 +125,15 @@ describe('LeadsService', () => {
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('rejeita payload sem email', async () => {
+    it('aceita payload sem email sem gravar', async () => {
       prisma.users.findUnique.mockResolvedValue(user);
 
-      await expect(
-        service.ingestFromWebhook('token-x', {
-          contact: { name: 'Sem Email' },
-        }),
-      ).rejects.toBeInstanceOf(BadRequestException);
+      const result = await service.ingestFromWebhook('token-x', {
+        contact: { name: 'Sem Email' },
+      });
+
+      expect(result).toEqual({ accepted: false, reason: 'missing_email' });
+      expect(prisma.lead.upsert).not.toHaveBeenCalled();
     });
   });
 
