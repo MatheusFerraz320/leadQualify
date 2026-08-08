@@ -1,0 +1,2 @@
+## request bugada no rd 
+o rd station enviava um GET inicial para o webhook para fins de verificação , o controller do webhook não possuia esse metodo apenas o post para inserção do lead , isso gerou quebra , foi feito um fix para ter match de methods , então o validate do rd deve passar

@@ -28,6 +28,7 @@ const prisma = {
   },
   lead: {
     upsert: jest.fn(),
+    create: jest.fn(),
     findMany: jest.fn(),
     findFirst: jest.fn(),
     update: jest.fn(),
@@ -74,6 +75,8 @@ describe('LeadsService', () => {
           personal_phone: '48 9999-9999',
           cf_produto: ['Plano Pro'],
           cf_finalidade: 'Compra',
+          cf_utm_campanha: ['campanha-1'],
+          cf_utm_palavra_chave: 'kw',
         },
       });
 
@@ -89,12 +92,20 @@ describe('LeadsService', () => {
           phone: '48 9999-9999',
           product: 'Plano Pro',
           finality: 'Compra',
+          utmAnuncioId: null,
+          utmCampanha: 'campanha-1',
+          utmGrupoAnuncio: null,
+          utmPalavraChave: 'kw',
         },
         update: {
           name: 'João',
           phone: '48 9999-9999',
           product: 'Plano Pro',
           finality: 'Compra',
+          utmAnuncioId: null,
+          utmCampanha: 'campanha-1',
+          utmGrupoAnuncio: null,
+          utmPalavraChave: 'kw',
         },
       });
     });
@@ -125,15 +136,44 @@ describe('LeadsService', () => {
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('aceita payload sem email sem gravar', async () => {
+    it('grava lead sem email com nome fallback', async () => {
       prisma.users.findUnique.mockResolvedValue(user);
+      prisma.lead.create.mockResolvedValue({ id: 'lead-2' });
 
       const result = await service.ingestFromWebhook('token-x', {
-        contact: { name: 'Sem Email' },
+        event_type: 'WEBHOOK.CONVERTED',
+        contact: { name: 'Lead Anonimo', cf_utm_campanha: 'camp-x' },
       });
 
-      expect(result).toEqual({ accepted: false, reason: 'missing_email' });
+      expect(result).toEqual({ id: 'lead-2' });
       expect(prisma.lead.upsert).not.toHaveBeenCalled();
+      expect(prisma.lead.create).toHaveBeenCalledWith({
+        data: {
+          userId: 'user-collab',
+          email: null,
+          name: 'Lead Anonimo',
+          phone: '',
+          product: '',
+          finality: '',
+          utmAnuncioId: null,
+          utmCampanha: 'camp-x',
+          utmGrupoAnuncio: null,
+          utmPalavraChave: null,
+        },
+      });
+    });
+
+    it('grava lead sem email nem nome com fallback "Sem nome"', async () => {
+      prisma.users.findUnique.mockResolvedValue(user);
+      prisma.lead.create.mockResolvedValue({ id: 'lead-3' });
+
+      await service.ingestFromWebhook('token-x', { contact: {} });
+
+      const args = prisma.lead.create.mock.calls[0][0] as {
+        data: { email: string | null; name: string };
+      };
+      expect(args.data.email).toBeNull();
+      expect(args.data.name).toBe('Sem nome');
     });
   });
 

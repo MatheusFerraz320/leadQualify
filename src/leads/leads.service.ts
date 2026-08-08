@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -16,6 +17,8 @@ const LEAD_USER_SELECT = { select: { id: true, name: true, email: true } };
 
 @Injectable()
 export class LeadsService {
+  private readonly logger = new Logger(LeadsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
@@ -27,15 +30,14 @@ export class LeadsService {
     });
 
     if (!user) {
+      this.logger.warn(
+        `Webhook rejeitado: token inválido (${payload.event_type ?? '?'})`,
+      );
       throw new NotFoundException('Token de webhook inválido');
     }
 
     const contact = payload.contact ?? {};
     const email = this.normalizeEmail(contact.email);
-
-    if (!email) {
-      return { accepted: false, reason: 'missing_email' };
-    }
 
     const productField =
       this.config.get<string>('RD_FIELD_PRODUCT') ?? 'cf_produto';
@@ -43,20 +45,44 @@ export class LeadsService {
       this.config.get<string>('RD_FIELD_FINALITY') ?? 'cf_finalidade';
 
     const data = {
-      name: this.normalize(contact.name) ?? email.split('@')[0],
+      name:
+        this.normalize(contact.name) ??
+        (email ? email.split('@')[0] : 'Sem nome'),
       phone:
         this.normalize(contact.personal_phone) ??
         this.normalize(contact.mobile_phone) ??
         '',
       product: this.readCustomField(contact, productField),
       finality: this.readCustomField(contact, finalityField),
+      utmAnuncioId: this.readCustomField(contact, 'cf_utm_anuncio_id') || null,
+      utmCampanha: this.readCustomField(contact, 'cf_utm_campanha') || null,
+      utmGrupoAnuncio:
+        this.readCustomField(contact, 'cf_utm_grupo_anuncio') || null,
+      utmPalavraChave:
+        this.readCustomField(contact, 'cf_utm_palavra_chave') || null,
     };
 
-    return this.prisma.lead.upsert({
-      where: { userId_email: { userId: user.id, email } },
-      create: { userId: user.id, email, ...data },
-      update: data,
+    if (email) {
+      const lead = await this.prisma.lead.upsert({
+        where: { userId_email: { userId: user.id, email } },
+        create: { userId: user.id, email, ...data },
+        update: data,
+      });
+      this.logger.log(
+        `Webhook de ${user.email}: evento ${payload.event_type ?? '?'}, email ${email} -> ${
+          lead.createdAt === lead.updatedAt ? 'criado' : 'atualizado'
+        }`,
+      );
+      return lead;
+    }
+
+    const lead = await this.prisma.lead.create({
+      data: { userId: user.id, email: null, ...data },
     });
+    this.logger.log(
+      `Webhook de ${user.email}: evento ${payload.event_type ?? '?'}, sem email -> criado (id ${lead.id})`,
+    );
+    return lead;
   }
 
   findAll(user: AuthenticatedUser, query: QueryLeadsDto) {
