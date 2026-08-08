@@ -60,24 +60,39 @@ describe('LeadsService', () => {
   describe('ingestFromWebhook', () => {
     const user = { id: 'user-collab', name: 'Colab', email: 'colab@test.com' };
 
-    it('cria lead com token válido e campos mapeados', async () => {
+    const mockLead = (createdAt: Date) => ({
+      id: 'lead-1',
+      createdAt,
+      updatedAt: createdAt,
+    });
+
+    it('cria lead com payload leads[] e campos mapeados', async () => {
       prisma.users.findUnique.mockResolvedValue(user);
-      prisma.lead.upsert.mockResolvedValue({ id: 'lead-1' });
+      const now = new Date();
+      prisma.lead.upsert.mockResolvedValue(mockLead(now));
       config.get.mockImplementation((key: string) =>
         key === 'RD_FIELD_PRODUCT' ? 'cf_produto' : 'cf_finalidade',
       );
 
-      await service.ingestFromWebhook('token-x', {
-        event_type: 'WEBHOOK.CONVERTED',
-        contact: {
-          email: 'A@B.COM',
-          name: 'João',
-          personal_phone: '48 9999-9999',
-          cf_produto: ['Plano Pro'],
-          cf_finalidade: 'Compra',
-          cf_utm_campanha: ['campanha-1'],
-          cf_utm_palavra_chave: 'kw',
-        },
+      const result = await service.ingestFromWebhook('token-x', {
+        leads: [
+          {
+            id: '4801358631',
+            email: 'A@B.COM',
+            name: 'João',
+            phone: '48 9999-9999',
+            first_conversion: {
+              content: {
+                event_type: 'CONVERSION',
+                event_identifier: '[B2] Filtros e elementos',
+                cf_produto: ['Plano Pro'],
+                cf_finalidade: 'Compra',
+                cf_utm_campanha: ['campanha-1'],
+                cf_utm_palavra_chave: 'kw',
+              },
+            },
+          },
+        ],
       });
 
       expect(prisma.users.findUnique).toHaveBeenCalledWith({
@@ -108,14 +123,22 @@ describe('LeadsService', () => {
           utmPalavraChave: 'kw',
         },
       });
+      expect(result).toEqual({
+        accepted: true,
+        processed: 1,
+        created: 1,
+        updated: 0,
+        skipped: 0,
+      });
     });
 
     it('usa defaults para os campos customizados quando não configurados', async () => {
       prisma.users.findUnique.mockResolvedValue(user);
-      prisma.lead.upsert.mockResolvedValue({ id: 'lead-1' });
+      const now = new Date();
+      prisma.lead.upsert.mockResolvedValue(mockLead(now));
 
       await service.ingestFromWebhook('token-x', {
-        contact: { email: 'joao@test.com', name: 'João' },
+        leads: [{ email: 'joao@test.com', name: 'João' }],
       });
 
       const args = prisma.lead.upsert.mock.calls[0][0] as {
@@ -130,50 +153,75 @@ describe('LeadsService', () => {
       prisma.users.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.ingestFromWebhook('token-invalido', {
-          contact: { email: 'a@b.com', name: 'A' },
-        }),
+        service.ingestFromWebhook('token-invalido', { leads: [] }),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('grava lead sem email com nome fallback', async () => {
+    it('ignora lead sem email e não grava', async () => {
       prisma.users.findUnique.mockResolvedValue(user);
-      prisma.lead.create.mockResolvedValue({ id: 'lead-2' });
 
       const result = await service.ingestFromWebhook('token-x', {
-        event_type: 'WEBHOOK.CONVERTED',
-        contact: { name: 'Lead Anonimo', cf_utm_campanha: 'camp-x' },
+        leads: [{ id: '1', name: 'Sem Email', phone: '48 9999-9999' }],
       });
 
-      expect(result).toEqual({ id: 'lead-2' });
       expect(prisma.lead.upsert).not.toHaveBeenCalled();
-      expect(prisma.lead.create).toHaveBeenCalledWith({
-        data: {
-          userId: 'user-collab',
-          email: null,
-          name: 'Lead Anonimo',
-          phone: '',
-          product: '',
-          finality: '',
-          utmAnuncioId: null,
-          utmCampanha: 'camp-x',
-          utmGrupoAnuncio: null,
-          utmPalavraChave: null,
-        },
+      expect(result).toEqual({
+        accepted: true,
+        processed: 1,
+        created: 0,
+        updated: 0,
+        skipped: 1,
       });
     });
 
-    it('grava lead sem email nem nome com fallback "Sem nome"', async () => {
+    it('processa múltiplos leads e conta criados/ignorados', async () => {
       prisma.users.findUnique.mockResolvedValue(user);
-      prisma.lead.create.mockResolvedValue({ id: 'lead-3' });
+      const now = new Date();
+      prisma.lead.upsert.mockResolvedValue(mockLead(now));
 
-      await service.ingestFromWebhook('token-x', { contact: {} });
+      const result = await service.ingestFromWebhook('token-x', {
+        leads: [
+          { email: 'a@b.com', name: 'A' },
+          { name: 'Sem Email' },
+          { email: 'c@d.com', name: 'C' },
+        ],
+      });
 
-      const args = prisma.lead.create.mock.calls[0][0] as {
-        data: { email: string | null; name: string };
-      };
-      expect(args.data.email).toBeNull();
-      expect(args.data.name).toBe('Sem nome');
+      expect(prisma.lead.upsert).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        accepted: true,
+        processed: 3,
+        created: 2,
+        updated: 0,
+        skipped: 1,
+      });
+    });
+
+    it('mantém compatibilidade com formato antigo (contact)', async () => {
+      prisma.users.findUnique.mockResolvedValue(user);
+      const now = new Date();
+      prisma.lead.upsert.mockResolvedValue(mockLead(now));
+
+      await service.ingestFromWebhook('token-x', {
+        event_type: 'WEBHOOK.CONVERTED',
+        contact: {
+          email: 'a@b.com',
+          name: 'João',
+          personal_phone: '48 9999-9999',
+          cf_utm_campanha: ['campanha-1'],
+        },
+      });
+
+      expect(prisma.lead.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({
+            email: 'a@b.com',
+            name: 'João',
+            phone: '48 9999-9999',
+            utmCampanha: 'campanha-1',
+          }),
+        }),
+      );
     });
   });
 

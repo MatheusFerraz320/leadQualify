@@ -17,7 +17,7 @@
 | Lead capturado não pode ter campos obrigatórios vazios | Um lead só é capturado com nome e email preenchidos (não vazios). |
 | Ingestão via webhook RD Station | `POST /webhooks/rdstation/:token` ingere leads em tempo real. O token identifica o usuário dono (`Users.rdWebhookToken`). |
 | Upsert por email do dono | O lead é criado ou atualizado pela chave `(userId, email)`. Em atualizações o `status` (APPROVED/REJECTED/PENDING) nunca é sobrescrito pelo webhook. |
-| Lead sem email é rejeitado | Payload de webhook sem `contact.email` retorna erro e não grava o lead. |
+| Lead sem email é ignorado | Lead do webhook (array `leads[]`) sem email é ignorado e não gravado; o webhook responde 2xx e segue para o próximo lead do batch. |
 | Token inválido é rejeitado | Webhook com token inexistente retorna 404 e não grava o lead. |
 | Visibilidade por role | Colaborador enxerga apenas leads com `userId` próprio. Admin enxerga todos, com filtro opcional por `userId`. |
 | Token só em endpoint dedicado | `rdWebhookToken` nunca é retornado em `signup`, `update`, `updateProfile` nem `findAll`. Apenas `GET`/`POST /users/:id/rdstation-token` (admin) o retornam. |

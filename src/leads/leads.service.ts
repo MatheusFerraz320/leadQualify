@@ -15,6 +15,13 @@ import type { RdWebhookPayload } from './rd-webhook.type.js';
 
 const LEAD_USER_SELECT = { select: { id: true, name: true, email: true } };
 
+interface WebhookEntry {
+  email?: string;
+  name?: string;
+  phone: string;
+  content: Record<string, unknown>;
+}
+
 @Injectable()
 export class LeadsService {
   private readonly logger = new Logger(LeadsService.name);
@@ -30,59 +37,98 @@ export class LeadsService {
     });
 
     if (!user) {
-      this.logger.warn(
-        `Webhook rejeitado: token inválido (${payload.event_type ?? '?'})`,
-      );
+      this.logger.warn('Webhook rejeitado: token inválido');
       throw new NotFoundException('Token de webhook inválido');
     }
 
-    const contact = payload.contact ?? {};
-    const email = this.normalizeEmail(contact.email);
+    const entries = this.toWebhookEntries(payload);
 
     const productField =
       this.config.get<string>('RD_FIELD_PRODUCT') ?? 'cf_produto';
     const finalityField =
       this.config.get<string>('RD_FIELD_FINALITY') ?? 'cf_finalidade';
 
-    const data = {
-      name:
-        this.normalize(contact.name) ??
-        (email ? email.split('@')[0] : 'Sem nome'),
-      phone:
-        this.normalize(contact.personal_phone) ??
-        this.normalize(contact.mobile_phone) ??
-        '',
-      product: this.readCustomField(contact, productField),
-      finality: this.readCustomField(contact, finalityField),
-      utmAnuncioId: this.readCustomField(contact, 'cf_utm_anuncio_id') || null,
-      utmCampanha: this.readCustomField(contact, 'cf_utm_campanha') || null,
-      utmGrupoAnuncio:
-        this.readCustomField(contact, 'cf_utm_grupo_anuncio') || null,
-      utmPalavraChave:
-        this.readCustomField(contact, 'cf_utm_palavra_chave') || null,
-    };
+    let created = 0;
+    let updated = 0;
+    let skipped = 0;
 
-    if (email) {
+    for (const entry of entries) {
+      const email = this.normalizeEmail(entry.email);
+
+      if (!email) {
+        skipped += 1;
+        this.logger.warn(`Webhook de ${user.email}: lead sem email ignorado`);
+        continue;
+      }
+
+      const data = {
+        name: this.normalize(entry.name) ?? email.split('@')[0],
+        phone: entry.phone,
+        product: this.readCustomField(entry.content, productField),
+        finality: this.readCustomField(entry.content, finalityField),
+        utmAnuncioId:
+          this.readCustomField(entry.content, 'cf_utm_anuncio_id') || null,
+        utmCampanha:
+          this.readCustomField(entry.content, 'cf_utm_campanha') || null,
+        utmGrupoAnuncio:
+          this.readCustomField(entry.content, 'cf_utm_grupo_anuncio') || null,
+        utmPalavraChave:
+          this.readCustomField(entry.content, 'cf_utm_palavra_chave') || null,
+      };
+
       const lead = await this.prisma.lead.upsert({
         where: { userId_email: { userId: user.id, email } },
         create: { userId: user.id, email, ...data },
         update: data,
       });
-      this.logger.log(
-        `Webhook de ${user.email}: evento ${payload.event_type ?? '?'}, email ${email} -> ${
-          lead.createdAt === lead.updatedAt ? 'criado' : 'atualizado'
-        }`,
-      );
-      return lead;
+
+      if (lead.createdAt === lead.updatedAt) {
+        created += 1;
+      } else {
+        updated += 1;
+      }
     }
 
-    const lead = await this.prisma.lead.create({
-      data: { userId: user.id, email: null, ...data },
-    });
     this.logger.log(
-      `Webhook de ${user.email}: evento ${payload.event_type ?? '?'}, sem email -> criado (id ${lead.id})`,
+      `Webhook de ${user.email}: ${entries.length} lead(s) recebido(s) | criados=${created}, atualizados=${updated}, ignorados=${skipped}`,
     );
-    return lead;
+
+    return {
+      accepted: true,
+      processed: entries.length,
+      created,
+      updated,
+      skipped,
+    };
+  }
+
+  private toWebhookEntries(payload: RdWebhookPayload): WebhookEntry[] {
+    if (Array.isArray(payload.leads) && payload.leads.length > 0) {
+      return payload.leads.map((lead) => ({
+        email: lead.email,
+        name: lead.name,
+        phone:
+          this.normalize(lead.phone) ??
+          this.normalize(lead.personal_phone) ??
+          this.normalize(lead.mobile_phone) ??
+          '',
+        content:
+          lead.first_conversion?.content ?? lead.last_conversion?.content ?? {},
+      }));
+    }
+
+    const contact = payload.contact ?? {};
+    return [
+      {
+        email: contact.email,
+        name: contact.name,
+        phone:
+          this.normalize(contact.personal_phone) ??
+          this.normalize(contact.mobile_phone) ??
+          '',
+        content: contact,
+      },
+    ];
   }
 
   findAll(user: AuthenticatedUser, query: QueryLeadsDto) {

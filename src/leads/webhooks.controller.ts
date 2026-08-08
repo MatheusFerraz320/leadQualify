@@ -15,8 +15,9 @@ export class WebhooksController {
 
   @Post('rdstation/:token')
   rdstation(@Param('token') token: string, @Body() payload: RdWebhookPayload) {
+    const leads = Array.isArray(payload.leads) ? payload.leads : [];
     this.logger.log(
-      `POST rdstation recebido | evento: ${payload.event_type ?? '?'} | corpo: ${JSON.stringify(
+      `POST rdstation recebido | ${leads.length} lead(s) | corpo: ${JSON.stringify(
         payload,
       ).slice(0, 500)}`,
     );
