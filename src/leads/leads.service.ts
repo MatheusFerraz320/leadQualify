@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '../generated/prisma/client.js';
-import { UserRole } from '../generated/prisma/enums.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { scopeWhere } from '../common/scope.js';
 import type { AuthenticatedUser } from '../common/guards/auth.guard.js';
 import { UpdateLeadDto } from './dto/update-lead.dto.js';
 import { QueryLeadsDto } from './dto/query-leads.dto.js';
@@ -171,7 +171,7 @@ export class LeadsService {
 
   findAll(user: AuthenticatedUser, query: QueryLeadsDto) {
     const where: Prisma.LeadWhereInput = {
-      ...this.scopeWhere(user, query.userId),
+      ...scopeWhere(user, query.userId),
       ...(query.status ? { status: query.status } : {}),
       ...(query.search
         ? {
@@ -192,7 +192,7 @@ export class LeadsService {
 
   async findOne(id: string, user: AuthenticatedUser) {
     const lead = await this.prisma.lead.findFirst({
-      where: this.scopeWhere(user, undefined, { id }),
+      where: scopeWhere(user, undefined, { id }),
       include: { user: LEAD_USER_SELECT },
     });
 
@@ -204,7 +204,7 @@ export class LeadsService {
   }
 
   async update(id: string, user: AuthenticatedUser, dto: UpdateLeadDto) {
-    const where = this.scopeWhere(user, undefined, { id });
+    const where = scopeWhere(user, undefined, { id });
     const existing = await this.prisma.lead.findFirst({ where });
 
     if (!existing) {
@@ -224,7 +224,7 @@ export class LeadsService {
 
   async remove(id: string, user: AuthenticatedUser) {
     const result = await this.prisma.lead.deleteMany({
-      where: this.scopeWhere(user, undefined, { id }),
+      where: scopeWhere(user, undefined, { id }),
     });
 
     if (result.count === 0) {
@@ -252,17 +252,6 @@ export class LeadsService {
         total: group._count._all,
       }))
       .sort((a, b) => b.total - a.total);
-  }
-
-  private scopeWhere(
-    user: AuthenticatedUser,
-    userId?: string,
-    extra: Prisma.LeadWhereInput = {},
-  ): Prisma.LeadWhereInput {
-    if (user.role === UserRole.ADMIN) {
-      return userId ? { ...extra, userId } : extra;
-    }
-    return { ...extra, userId: user.sub };
   }
 
   private normalize(value: unknown): string | null {
