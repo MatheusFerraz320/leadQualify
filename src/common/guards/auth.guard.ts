@@ -4,8 +4,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
+import { authCookieName } from '../cookies.js';
 
 export interface AuthenticatedUser {
   sub: string;
@@ -20,11 +22,14 @@ export interface AuthenticatedRequest extends Request {
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = this.extractTokenFromHeader(request);
+    const token = this.extractToken(request);
 
     if (!token) {
       throw new UnauthorizedException('Token não fornecido');
@@ -39,9 +44,14 @@ export class AuthGuard implements CanActivate {
 
     return true;
   }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+  private extractToken(request: AuthenticatedRequest): string | undefined {
+    const [type, bearerToken] = request.headers.authorization?.split(' ') ?? [];
+    if (type === 'Bearer' && bearerToken) {
+      return bearerToken;
+    }
+    const cookieValue: string | undefined = request.cookies?.[
+      authCookieName(this.config)
+    ] as string | undefined;
+    return cookieValue;
   }
 }
