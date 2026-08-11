@@ -54,7 +54,8 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto) {
-    const data = { ...dto };
+    const { confirm_password: _confirm_password, ...rest } = dto;
+    const data = { ...rest };
     if (data.password) {
       data.password = await bcrypt.hash(data.password, SALT_ROUNDS);
     }
@@ -77,7 +78,8 @@ export class UsersService {
   }
 
   async updateProfile(id: string, dto: UpdateProfileDto) {
-    const data = { ...dto };
+    const { confirm_password: _confirm_password, ...rest } = dto;
+    const data = { ...rest };
     if (data.password) {
       data.password = await bcrypt.hash(data.password, SALT_ROUNDS);
     }
