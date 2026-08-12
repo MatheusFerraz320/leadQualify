@@ -173,5 +173,67 @@ describe('DashboardService', () => {
       expect(result.totals.previousMonth).toBe(4);
       expect(result.totals.monthDeltaPct).toBe(25);
     });
+
+    it('escopa métricas ao mês informado', async () => {
+      mockStatusGroups();
+      prisma.lead.count.mockResolvedValue(0);
+      prisma.$queryRaw.mockResolvedValue([]);
+
+      await service.summary(admin, undefined, '2026-03');
+
+      const groupByCalls = prisma.lead.groupBy.mock.calls.map(
+        (call) =>
+          call[0] as {
+            where?: { createdAt?: { gte?: Date; lt?: Date } };
+          },
+      );
+      for (const call of groupByCalls) {
+        expect(call.where?.createdAt?.gte).toEqual(
+          new Date(Date.UTC(2026, 2, 1)),
+        );
+        expect(call.where?.createdAt?.lt).toEqual(
+          new Date(Date.UTC(2026, 3, 1)),
+        );
+      }
+    });
+
+    it('mantém tendência mensal sem filtro de mês', async () => {
+      mockStatusGroups();
+      prisma.lead.count.mockResolvedValue(0);
+      prisma.$queryRaw.mockResolvedValue([]);
+
+      await service.summary(admin, undefined, '2026-03');
+
+      const queryRawCall = prisma.$queryRaw.mock.calls[0]?.[0] as
+        { values?: unknown[] } | undefined;
+      expect(queryRawCall?.values).toEqual([]);
+    });
+
+    it('calcula delta relativo ao mês selecionado', async () => {
+      mockStatusGroups();
+      prisma.lead.count.mockResolvedValueOnce(5).mockResolvedValueOnce(4);
+      prisma.$queryRaw.mockResolvedValue([]);
+
+      const result = await service.summary(admin, undefined, '2026-03');
+
+      expect(result.totals.newThisMonth).toBe(5);
+      expect(result.totals.previousMonth).toBe(4);
+      expect(result.totals.monthDeltaPct).toBe(25);
+
+      const countCalls = prisma.lead.count.mock.calls.map(
+        (call) =>
+          call[0] as {
+            where?: { createdAt?: { gte?: Date; lt?: Date } };
+          },
+      );
+      expect(countCalls[0]?.where?.createdAt).toEqual({
+        gte: new Date(Date.UTC(2026, 2, 1)),
+        lt: new Date(Date.UTC(2026, 3, 1)),
+      });
+      expect(countCalls[1]?.where?.createdAt).toEqual({
+        gte: new Date(Date.UTC(2026, 1, 1)),
+        lt: new Date(Date.UTC(2026, 2, 1)),
+      });
+    });
   });
 });

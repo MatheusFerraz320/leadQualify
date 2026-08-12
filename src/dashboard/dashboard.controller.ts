@@ -15,6 +15,10 @@ export class DashboardController {
     @Req() request: AuthenticatedRequest,
     @Query() query: QuerySummaryDto,
   ) {
-    return this.dashboardService.summary(request.user, query.userId);
+    return this.dashboardService.summary(
+      request.user,
+      query.userId,
+      query.month,
+    );
   }
 }
