@@ -18,6 +18,7 @@ model Users {
   updatedAt        DateTime @updatedAt
   deletedAt        DateTime?
   leads            Lead[]
+  description      String?
 }
 
 model Lead {
@@ -36,6 +37,7 @@ model Lead {
   status          LeadStatus @default(PENDING)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  aiReason        String?
 
   @@unique([userId, email])
 }
