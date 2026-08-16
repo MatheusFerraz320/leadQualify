@@ -15,7 +15,9 @@ export class UpdateLeadDto {
 
   @IsOptional()
   @IsEmail({}, { message: 'email inválido' })
-  @Transform(({ value }) => (typeof value === 'string'? && value.toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.toLowerCase() : value,
+  )
   email?: string;
 
   @IsOptional()
