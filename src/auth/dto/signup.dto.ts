@@ -10,7 +10,7 @@ import { Match } from '../../common/decorators/match.decorator.js';
 
 export class SignupDto {
   @IsString()
-  @IsNotEmpty({ message: 'name é obrigatório' })
+  @IsNotEmpty({ message: 'nome é obrigatório' })
   name: string;
 
   @IsEmail({}, { message: 'email inválido' })
