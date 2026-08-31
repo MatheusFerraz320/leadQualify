@@ -17,6 +17,19 @@ type UserBreakdown = {
   conversionRate: number;
 };
 
+type RateItem = {
+  label: string;
+  approved: number;
+  rejected: number;
+  total: number;
+  rate: number;
+};
+
+type RateBreakdown = {
+  topApproval: RateItem[];
+  topRejection: RateItem[];
+};
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -58,6 +71,8 @@ export class DashboardService {
       thisMonth,
       prevMonth,
       byUser,
+      byCampaignRate,
+      byAdGroupRate,
     ] = await Promise.all([
       this.prisma.lead.groupBy({
         by: ['status'],
@@ -82,6 +97,8 @@ export class DashboardService {
       user.role === UserRole.ADMIN
         ? this.byUserBreakdown(where)
         : Promise.resolve([]),
+      this.topByRate(where, 'utmCampanha'),
+      this.topByRate(where, 'utmGrupoAnuncio'),
     ]);
 
     const totals = this.computeTotals(statusGroups, thisMonth, prevMonth);
@@ -93,6 +110,8 @@ export class DashboardService {
       byProduct,
       byCampaign,
       byUser,
+      byCampaignRate,
+      byAdGroupRate,
     };
   }
 
@@ -189,6 +208,49 @@ export class DashboardService {
         label: (group.utmCampanha || '').trim() || '—',
         count: Number(group._count._all),
       }));
+  }
+
+  private async topByRate(
+    where: Prisma.LeadWhereInput,
+    byField: 'utmCampanha' | 'utmGrupoAnuncio',
+  ): Promise<RateBreakdown> {
+    const groups = await this.prisma.lead.groupBy({
+      by: [byField, 'status'],
+      where,
+      _count: { _all: true },
+    });
+
+    const aggregates = new Map<
+      string,
+      { approved: number; rejected: number }
+    >();
+
+    for (const group of groups) {
+      const label = (group[byField] || '').trim();
+      if (!label) continue;
+
+      const current = aggregates.get(label) ?? { approved: 0, rejected: 0 };
+      if (group.status === LeadStatus.APPROVED)
+        current.approved = group._count._all;
+      else if (group.status === LeadStatus.REJECTED)
+        current.rejected = group._count._all;
+      aggregates.set(label, current);
+    }
+
+    const items: RateItem[] = [...aggregates.entries()]
+      .filter(([, agg]) => agg.approved + agg.rejected > 0)
+      .map(([label, agg]) => ({
+        label,
+        approved: agg.approved,
+        rejected: agg.rejected,
+        total: agg.approved + agg.rejected,
+        rate: agg.approved / (agg.approved + agg.rejected),
+      }));
+
+    const topApproval = [...items].sort((a, b) => b.rate - a.rate).slice(0, 5);
+    const topRejection = [...items].sort((a, b) => a.rate - b.rate).slice(0, 5);
+
+    return { topApproval, topRejection };
   }
 
   private async monthlyBuckets(

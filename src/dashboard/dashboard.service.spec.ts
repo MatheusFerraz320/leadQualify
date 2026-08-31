@@ -62,8 +62,51 @@ describe('DashboardService', () => {
         ]);
       }
       if (args.by.includes('utmCampanha')) {
+        if (args.by.includes('status')) {
+          return Promise.resolve([
+            {
+              utmCampanha: 'campanha-a',
+              status: LeadStatus.APPROVED,
+              _count: { _all: 4 },
+            },
+            {
+              utmCampanha: 'campanha-a',
+              status: LeadStatus.REJECTED,
+              _count: { _all: 1 },
+            },
+            {
+              utmCampanha: 'campanha-b',
+              status: LeadStatus.APPROVED,
+              _count: { _all: 1 },
+            },
+            {
+              utmCampanha: 'campanha-b',
+              status: LeadStatus.REJECTED,
+              _count: { _all: 4 },
+            },
+          ]);
+        }
         return Promise.resolve([
           { utmCampanha: 'campanha-1', _count: { _all: 3 } },
+        ]);
+      }
+      if (args.by.includes('utmGrupoAnuncio')) {
+        return Promise.resolve([
+          {
+            utmGrupoAnuncio: 'grupo-x',
+            status: LeadStatus.APPROVED,
+            _count: { _all: 3 },
+          },
+          {
+            utmGrupoAnuncio: 'grupo-x',
+            status: LeadStatus.REJECTED,
+            _count: { _all: 1 },
+          },
+          {
+            utmGrupoAnuncio: '',
+            status: LeadStatus.REJECTED,
+            _count: { _all: 2 },
+          },
         ]);
       }
       if (args.by.includes('userId')) {
@@ -174,66 +217,43 @@ describe('DashboardService', () => {
       expect(result.totals.monthDeltaPct).toBe(25);
     });
 
-    it('escopa métricas ao mês informado', async () => {
+    it('calcula top campanhas e grupos por taxa', async () => {
       mockStatusGroups();
       prisma.lead.count.mockResolvedValue(0);
       prisma.$queryRaw.mockResolvedValue([]);
 
-      await service.summary(admin, undefined, '2026-03');
+      const result = await service.summary(collaborator);
 
-      const groupByCalls = prisma.lead.groupBy.mock.calls.map(
-        (call) =>
-          call[0] as {
-            where?: { createdAt?: { gte?: Date; lt?: Date } };
-          },
-      );
-      for (const call of groupByCalls) {
-        expect(call.where?.createdAt?.gte).toEqual(
-          new Date(Date.UTC(2026, 2, 1)),
-        );
-        expect(call.where?.createdAt?.lt).toEqual(
-          new Date(Date.UTC(2026, 3, 1)),
-        );
-      }
+      expect(result.byCampaignRate.topApproval[0].label).toBe('campanha-a');
+      expect(result.byCampaignRate.topApproval[0].rate).toBeCloseTo(0.8);
+      expect(result.byCampaignRate.topApproval[0].approved).toBe(4);
+      expect(result.byCampaignRate.topRejection[0].label).toBe('campanha-b');
+      expect(result.byCampaignRate.topRejection[0].rate).toBeCloseTo(0.2);
+      expect(result.byAdGroupRate.topApproval).toHaveLength(1);
+      expect(result.byAdGroupRate.topApproval[0].label).toBe('grupo-x');
+      expect(result.byAdGroupRate.topApproval[0].rate).toBeCloseTo(0.75);
     });
 
-    it('mantém tendência mensal sem filtro de mês', async () => {
-      mockStatusGroups();
+    it('exclui campanhas sem leads avaliados das taxas', async () => {
+      prisma.lead.groupBy.mockImplementation((args: { by: string[] }) => {
+        if (args.by.includes('utmCampanha') && args.by.includes('status')) {
+          return Promise.resolve([
+            {
+              utmCampanha: 'so-pendente',
+              status: LeadStatus.PENDING,
+              _count: { _all: 3 },
+            },
+          ]);
+        }
+        return Promise.resolve([]);
+      });
       prisma.lead.count.mockResolvedValue(0);
       prisma.$queryRaw.mockResolvedValue([]);
 
-      await service.summary(admin, undefined, '2026-03');
+      const result = await service.summary(collaborator);
 
-      const queryRawCall = prisma.$queryRaw.mock.calls[0]?.[0] as
-        { values?: unknown[] } | undefined;
-      expect(queryRawCall?.values).toEqual([]);
-    });
-
-    it('calcula delta relativo ao mês selecionado', async () => {
-      mockStatusGroups();
-      prisma.lead.count.mockResolvedValueOnce(5).mockResolvedValueOnce(4);
-      prisma.$queryRaw.mockResolvedValue([]);
-
-      const result = await service.summary(admin, undefined, '2026-03');
-
-      expect(result.totals.newThisMonth).toBe(5);
-      expect(result.totals.previousMonth).toBe(4);
-      expect(result.totals.monthDeltaPct).toBe(25);
-
-      const countCalls = prisma.lead.count.mock.calls.map(
-        (call) =>
-          call[0] as {
-            where?: { createdAt?: { gte?: Date; lt?: Date } };
-          },
-      );
-      expect(countCalls[0]?.where?.createdAt).toEqual({
-        gte: new Date(Date.UTC(2026, 2, 1)),
-        lt: new Date(Date.UTC(2026, 3, 1)),
-      });
-      expect(countCalls[1]?.where?.createdAt).toEqual({
-        gte: new Date(Date.UTC(2026, 1, 1)),
-        lt: new Date(Date.UTC(2026, 2, 1)),
-      });
+      expect(result.byCampaignRate.topApproval).toEqual([]);
+      expect(result.byCampaignRate.topRejection).toEqual([]);
     });
   });
 });

@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -291,7 +291,7 @@ export class LeadsService {
         throw new NotFoundException('Lead não encontrado');
       }
       if (error.code === 'P2002') {
-        throw new BadRequestException('Email já cadastrado para este lead');
+        throw new ConflictException('Email já cadastrado para outro lead');
       }
     }
     throw error;

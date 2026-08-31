@@ -42,6 +42,7 @@ export class LeadsController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   update(
     @Req() request: AuthenticatedRequest,
     @Param('id') id: string,
