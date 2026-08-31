@@ -34,21 +34,34 @@ type RateBreakdown = {
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async summary(user: AuthenticatedUser, requestedUserId?: string) {
+  async summary(
+    user: AuthenticatedUser,
+    requestedUserId?: string,
+    month?: string,
+  ) {
     const scopedUserId =
       user.role === UserRole.ADMIN ? (requestedUserId ?? null) : user.sub;
-    const where = scopeWhere(user, scopedUserId ?? undefined);
+    const baseWhere = scopeWhere(user, scopedUserId ?? undefined);
 
     const now = new Date();
-    const startThisMonth = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
-    );
-    const startNextMonth = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1),
-    );
+    const selectedMonth = month ? this.monthKeyBounds(month) : null;
+    const startThisMonth =
+      selectedMonth?.start ??
+      new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const startNextMonth =
+      selectedMonth?.startNext ??
+      new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
     const startPrevMonth = new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+      Date.UTC(
+        startThisMonth.getUTCFullYear(),
+        startThisMonth.getUTCMonth() - 1,
+        1,
+      ),
     );
+
+    const where: Prisma.LeadWhereInput = selectedMonth
+      ? { ...baseWhere, createdAt: { gte: startThisMonth, lt: startNextMonth } }
+      : baseWhere;
 
     const [
       statusGroups,
@@ -68,7 +81,7 @@ export class DashboardService {
       }),
       this.topProducts(where),
       this.topCampaigns(where),
-      this.monthlyBuckets(where),
+      this.monthlyBuckets(baseWhere),
       this.prisma.lead.count({
         where: {
           ...where,
@@ -152,6 +165,13 @@ export class DashboardService {
     return order
       .filter((status) => counts.has(status))
       .map((status) => ({ status, count: counts.get(status) ?? 0 }));
+  }
+
+  private monthKeyBounds(month: string) {
+    const [year, monthIndex] = month.split('-').map(Number);
+    const start = new Date(Date.UTC(year, monthIndex - 1, 1));
+    const startNext = new Date(Date.UTC(year, monthIndex, 1));
+    return { start, startNext };
   }
 
   private async topProducts(
