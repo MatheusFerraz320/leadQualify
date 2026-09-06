@@ -174,7 +174,7 @@ describe('LeadsService', () => {
                 event_identifier: 'formulario',
                 __cdp__original_event: {
                   payload: {
-                    cf_produto_ou_servico: 'Filtro B2',
+                    cf_produto_ou_servico: 'Filtro Industrial',
                     cf_finalidade: 'Industrial',
                   },
                 },
@@ -187,11 +187,11 @@ describe('LeadsService', () => {
       expect(prisma.lead.upsert).toHaveBeenCalledWith({
         where: { userId_email: { userId: 'user-collab', email: 'a@b.com' } },
         create: expect.objectContaining({
-          product: 'Filtro B2',
+          product: 'Filtro Industrial',
           finality: 'Industrial',
         }),
         update: expect.objectContaining({
-          product: 'Filtro B2',
+          product: 'Filtro Industrial',
           finality: 'Industrial',
         }),
       });

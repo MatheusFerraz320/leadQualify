@@ -57,7 +57,7 @@ describe('DashboardService', () => {
       }
       if (args.by.includes('product')) {
         return Promise.resolve([
-          { product: 'Filtro B2', _count: { _all: 4 } },
+          { product: 'Filtro Industrial', _count: { _all: 4 } },
           { product: '', _count: { _all: 2 } },
         ]);
       }
