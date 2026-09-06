@@ -1,10 +1,4 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { LeadStatus } from '../../generated/prisma/enums.js';
 import { Transform } from 'class-transformer';
 
@@ -15,7 +9,7 @@ export class UpdateLeadDto {
 
   @IsOptional()
   @IsEmail({}, { message: 'email inválido' })
-  @Transform(({ value }) =>
+  @Transform(({ value }: { value: string | undefined }) =>
     typeof value === 'string' ? value.toLowerCase() : value,
   )
   email?: string;
